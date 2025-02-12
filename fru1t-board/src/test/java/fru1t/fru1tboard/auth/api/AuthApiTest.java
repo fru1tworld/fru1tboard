@@ -87,13 +87,11 @@ public class AuthApiTest {
                 .retrieve()
                 .toEntity(AccessToken.class);
 
-        ResponseEntity<AccessToken> response2 = restClient.post()
-                .uri(BASE_URL + "/refresh")
-                .body(request.getBody())
-                .retrieve()
-                .toEntity(AccessToken.class);
 
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        String accessToken = response.getBody().getAccessToken();
+        assertThat(accessToken).isNotBlank();
     }
 
 }

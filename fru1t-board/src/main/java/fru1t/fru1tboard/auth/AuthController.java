@@ -47,22 +47,21 @@ public class AuthController {
     @PostMapping("/v1/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token) {
         String accessToken = token.replace("Bearer ", "");
-        log.info("Logout attempt with access token: {}", accessToken);
-
+        log.debug("Logout attempt with access token: {}", accessToken);
         authService.logout(accessToken);
 
-        log.info("Logout successful for token: {}", accessToken);
+        log.debug("Logout successful for token: {}", accessToken);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/v1/refresh")
-    public ResponseEntity<AccessToken> refreshToken(@RequestBody RefreshRequest request) {
-        log.info("Refresh token request received with refresh token: {}", request.getRefreshToken());
+    public ResponseEntity<AccessToken> refreshToken(@RequestHeader("Authorization") RefreshRequest request) {
+        log.debug("Refresh token request received with refresh token: {}", request.getRefreshToken());
 
         TokenResponse tokenResponse = authService.refreshToken(request);
 
-        log.info("Token refresh successful, new access token generated.");
+        log.debug("Token refresh successful, new access token generated.");
 
         return ResponseEntity.ok(AccessToken.create(tokenResponse.getAccessToken()));
     }
