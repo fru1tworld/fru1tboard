@@ -30,56 +30,87 @@ class JwtUtilTest {
         }
     }
 
-    private String generateToken(long expirationMillis, Key key, SignatureAlgorithm algorithm) {
+    private String generateToken(long expirationMillis, Key key, SignatureAlgorithm algorithm, String tokenType) {
         return Jwts.builder()
                 .setSubject("testUser")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .claim("tokenType", tokenType)  // tokenType 추가
                 .signWith(key, algorithm)
                 .compact();
     }
 
     @Test
-    @DisplayName("유효한 JWT 토큰을 검증하면 true를 반환해야 한다.")
-    void validateToken_ShouldReturnTrue_WhenValidToken() {
-        String token = generateToken(60000, secretKey, SignatureAlgorithm.HS256);
-        assertTrue(jwtUtil.validateToken(token), "유효한 토큰이어야 합니다.");
+    @DisplayName("유효한 AccessToken을 검증하면 true를 반환해야 한다.")
+    void validateAccessToken_ShouldReturnTrue_WhenValidToken() {
+        String token = generateToken(60000, secretKey, SignatureAlgorithm.HS256, "access");
+        assertTrue(jwtUtil.validateTokenByType(token, "access"), "유효한 AccessToken이어야 합니다.");
     }
 
     @Test
-    @DisplayName("만료된 토큰을 검증하면 예외가 발생해야 한다.")
-    void validateToken_ShouldThrowException_WhenTokenExpired() {
-        String token = generateToken(-1000, secretKey, SignatureAlgorithm.HS256);
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateToken(token));
+    @DisplayName("유효한 RefreshToken을 검증하면 true를 반환해야 한다.")
+    void validateRefreshToken_ShouldReturnTrue_WhenValidToken() {
+        String token = generateToken(60000, secretKey, SignatureAlgorithm.HS256, "refresh");
+        assertTrue(jwtUtil.validateTokenByType(token, "refresh"), "유효한 RefreshToken이어야 합니다.");
+    }
+
+    @Test
+    @DisplayName("만료된 AccessToken을 검증하면 예외가 발생해야 한다.")
+    void validateAccessToken_ShouldThrowException_WhenTokenExpired() {
+        String token = generateToken(-1000, secretKey, SignatureAlgorithm.HS256, "access");
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(token, "access"));
         assertEquals("Token expired", thrown.getMessage());
     }
 
     @Test
-    @DisplayName("토큰이 변조되었을 경우 예외가 발생해야 한다.")
-    void validateToken_ShouldThrowException_WhenTokenTampered() {
-        String token = generateToken(60000, secretKey, SignatureAlgorithm.HS256) + "tampered";
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateToken(token));
+    @DisplayName("만료된 RefreshToken을 검증하면 예외가 발생해야 한다.")
+    void validateRefreshToken_ShouldThrowException_WhenTokenExpired() {
+        String token = generateToken(-1000, secretKey, SignatureAlgorithm.HS256, "refresh");
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(token, "refresh"));
+        assertEquals("Token expired", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("잘못된 AccessToken을 검증하면 예외가 발생해야 한다.")
+    void validateAccessToken_ShouldThrowException_WhenTokenTampered() {
+        String token = generateToken(60000, secretKey, SignatureAlgorithm.HS256, "access") + "tampered";
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(token, "access"));
         assertEquals("Invalid JWT signature", thrown.getMessage());
     }
 
     @Test
-    @DisplayName("잘못된 형식의 토큰이 주어지면 예외가 발생해야 한다.")
-    void validateToken_ShouldThrowException_WhenTokenMalformed() {
+    @DisplayName("잘못된 RefreshToken을 검증하면 예외가 발생해야 한다.")
+    void validateRefreshToken_ShouldThrowException_WhenTokenTampered() {
+        String token = generateToken(60000, secretKey, SignatureAlgorithm.HS256, "refresh") + "tampered";
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(token, "refresh"));
+        assertEquals("Invalid JWT signature", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("잘못된 형식의 AccessToken이 주어지면 예외가 발생해야 한다.")
+    void validateAccessToken_ShouldThrowException_WhenTokenMalformed() {
         String token = "thisIsNotAValidJwtToken";
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateToken(token));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(token, "access"));
+        assertEquals("Invalid JWT token", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("잘못된 형식의 RefreshToken이 주어지면 예외가 발생해야 한다.")
+    void validateRefreshToken_ShouldThrowException_WhenTokenMalformed() {
+        String token = "thisIsNotAValidJwtToken";
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(token, "refresh"));
         assertEquals("Invalid JWT token", thrown.getMessage());
     }
 
     @Test
     @DisplayName("잘못된 알고리즘(HMAC 대신 다른 알고리즘)으로 서명된 토큰을 검증하면 예외가 발생해야 한다.")
     void validateToken_ShouldThrowException_WhenAlgorithmInvalid() {
-        // Given
         byte[] keyBytes = new byte[64];
         new java.security.SecureRandom().nextBytes(keyBytes);
         Key differentKey = Keys.hmacShaKeyFor(keyBytes);
 
-        String token = generateToken(60000, differentKey, SignatureAlgorithm.HS512);
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateToken(token));
+        String token = generateToken(60000, differentKey, SignatureAlgorithm.HS512, "access");
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(token, "access"));
 
         assertTrue(
                 thrown.getMessage().contains("Invalid JWT signature") ||
@@ -94,7 +125,17 @@ class JwtUtilTest {
         String accessToken = jwtUtil.generateAccessToken(username);
         assertNotNull(accessToken, "Access Token이 null이 아니어야 합니다.");
         assertFalse(accessToken.isEmpty(), "Access Token이 비어 있으면 안 됩니다.");
-        assertTrue(jwtUtil.validateToken(accessToken));
+        assertTrue(jwtUtil.validateTokenByType(accessToken, "access"));
+    }
+
+    @Test
+    @DisplayName("RefreshToken을 정상적으로 생성해야 한다.")
+    void generateRefreshTokenTest() {
+        String username = "test";
+        String refreshToken = jwtUtil.generateRefreshToken(username);
+        assertNotNull(refreshToken, "Refresh Token이 null이 아니어야 합니다.");
+        assertFalse(refreshToken.isEmpty(), "Refresh Token이 비어 있으면 안 됩니다.");
+        assertTrue(jwtUtil.validateTokenByType(refreshToken, "refresh"));
     }
 
     @Test
@@ -106,7 +147,7 @@ class JwtUtilTest {
                 .setExpiration(new Date(System.currentTimeMillis() + 60000))
                 .compact(); // 서명 없음
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateToken(noneAlgorithmToken));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> jwtUtil.validateTokenByType(noneAlgorithmToken, "access"));
         assertTrue(thrown.getMessage().contains("JWT processing error"), "서명이 없는 JWT는 예외를 발생해야 합니다.");
     }
 }

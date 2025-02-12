@@ -9,13 +9,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil = new JwtUtil();
 
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/api/v1/signup", "/api/v1/login"
+    );
+
+    private static final List<String> REFRESH_TOKEN_PATHS = List.of(
+            "/api/v1/refresh"
     );
 
     @Override
@@ -41,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.debug("Executing JWT authentication filter for request: {} {}", request.getMethod(), request.getRequestURI());
 
         String token = extractToken(request);
+        String path = request.getRequestURI();
 
         if (token == null) {
             log.info("No JWT token found in request");
@@ -50,10 +54,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.debug("Extracted JWT token: {}", token);
 
-        if (!jwtUtil.validateToken(token)) {
-            log.info("Invalid JWT token provided");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-            return;
+        if (REFRESH_TOKEN_PATHS.contains(path)) {
+            if (!jwtUtil.validateTokenByType(token, "refresh")) {
+                log.info("Invalid Refresh JWT token provided");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return;
+            }
+        } else {
+            if (!jwtUtil.validateTokenByType(token, "access")) {
+                log.info("Invalid Access JWT token provided");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return;
+            }
         }
 
         log.debug("JWT token is valid. Proceeding with request.");

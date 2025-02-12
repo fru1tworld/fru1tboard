@@ -1,7 +1,6 @@
 package fru1t.fru1tboard.auth;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
 import java.util.Base64;
@@ -15,7 +14,6 @@ public class JwtUtil {
     static {
         try {
             byte[] keyBytes = Base64.getDecoder().decode(SECRET_KEY_STRING);
-
             SECRET_KEY = new SecretKeySpec(keyBytes, "HmacSHA256");
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid Base64 SECRET_KEY_STRING. Ensure it's a valid 32-byte Base64 encoded key.", e);
@@ -30,7 +28,8 @@ public class JwtUtil {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
-                .signWith(SECRET_KEY) // 자동으로 HS256 적용됨
+                .claim("tokenType", "access")
+                .signWith(SECRET_KEY)
                 .compact();
     }
 
@@ -39,17 +38,24 @@ public class JwtUtil {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
-                .signWith(SECRET_KEY) // 자동으로 HS256 적용됨
+                .claim("tokenType", "refresh")
+                .signWith(SECRET_KEY)
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateTokenByType(String token, String tokenTypeName) {
         try {
             Jws<Claims> claimsJws = Jwts.parserBuilder()
                     .setSigningKey(SECRET_KEY)
                     .build()
                     .parseClaimsJws(token);
-            return true;
+
+            String tokenType = claimsJws.getBody().get("tokenType", String.class);
+            if (tokenTypeName.equals(tokenType)) {
+                return true;
+            } else {
+                throw new RuntimeException("Invalid token type");
+            }
         } catch (ExpiredJwtException e) {
             throw new RuntimeException("Token expired");
         } catch (MalformedJwtException e) {
