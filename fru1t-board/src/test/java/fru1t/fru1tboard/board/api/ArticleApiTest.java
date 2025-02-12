@@ -36,13 +36,13 @@ public class ArticleApiTest {
     @Test
     void deleteTest() {
             restClient.delete()
-                    .uri("/v1/articles/{articleId}", 120115454734336L)
+                    .uri("/api/v1/articles/{articleId}", 120115454734336L)
                     .retrieve()
                     .toBodilessEntity();
     }
     ArticleResponse update(Long articleId, ArticleUpdateRequest request){
         return restClient.put()
-                .uri("/v1/articles/{articleId}",articleId)
+                .uri("/api/v1/articles/{articleId}",articleId)
                 .body(request)
                 .retrieve()
                 .body(ArticleResponse.class);
@@ -50,7 +50,7 @@ public class ArticleApiTest {
     }
     ArticleResponse create(ArticleCreateRequest request){
         return restClient.post()
-                .uri("/v1/articles")
+                .uri("/api/v1/articles")
                 .body(request)
                 .retrieve()
                 .body(ArticleResponse.class);
@@ -58,7 +58,7 @@ public class ArticleApiTest {
     }
     ArticleResponse read(Long articleId){
         return restClient.get()
-                .uri("/v1/articles/{articleId}",articleId)
+                .uri("/api/v1/articles/{articleId}",articleId)
                 .retrieve()
                 .body(ArticleResponse.class);
 

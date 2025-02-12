@@ -26,7 +26,6 @@ public class UserService {
         return UserResponse.from(user);
     }
 
-    @Transactional
     public UserResponse read(Long userId){
         User user = userRepository.findById(userId).orElseThrow();
         return UserResponse.from(user);

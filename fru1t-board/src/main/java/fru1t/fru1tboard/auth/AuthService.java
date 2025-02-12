@@ -3,6 +3,7 @@ package fru1t.fru1tboard.auth;
 import fru1t.fru1tboard.auth.dto.LoginRequest;
 import fru1t.fru1tboard.auth.dto.RefreshRequest;
 import fru1t.fru1tboard.auth.dto.TokenResponse;
+import fru1t.fru1tboard.auth.util.PasswordEncoder;
 import fru1t.fru1tboard.user.UserRepository;
 import fru1t.fru1tboard.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +15,15 @@ public class AuthService {
     private final JwtUtil jwtUtil = new JwtUtil();
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public TokenResponse login(LoginRequest request) {
         User user = findUser(request.getUsername());
-        if (!user.getPassword().equals(request.getPassword())) {
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
+
         String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
         String accessToken = jwtUtil.generateAccessToken(user.getUsername());
 

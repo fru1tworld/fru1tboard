@@ -1,17 +1,16 @@
 package fru1t.fru1tboard.auth.util;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PasswordEncoder {
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public String encode(String rawPassword) {
-        return passwordEncoder.encode(rawPassword);
+        return BCrypt.hashpw(rawPassword, BCrypt.gensalt(12));
     }
 
     public boolean matches(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
+        return BCrypt.checkpw(rawPassword, encodedPassword);
     }
 }

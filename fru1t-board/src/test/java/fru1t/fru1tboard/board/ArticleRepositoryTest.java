@@ -24,8 +24,6 @@ class ArticleRepositoryTest {
         );
         Article response = articleRepository.save(article);
         System.out.println("response = " + response.getArticleId());
-
-
     }
     @Getter
     @AllArgsConstructor

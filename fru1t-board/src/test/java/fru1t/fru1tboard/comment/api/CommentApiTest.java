@@ -33,13 +33,13 @@ public class CommentApiTest {
     @Test
     void deleteTest() {
         restClient.delete()
-                .uri("/v1/comments/{commentsId}", 120115454734336L)
+                .uri("/api/v1/comments/{commentsId}", 120115454734336L)
                 .retrieve()
                 .toBodilessEntity();
     }
     CommentResponse update(Long commentId, CommentUpdateRequest request){
         return restClient.put()
-                .uri("/v1/comments/{commentId}",commentId)
+                .uri("/api/v1/comments/{commentId}",commentId)
                 .body(request)
                 .retrieve()
                 .body(CommentResponse.class);
@@ -47,7 +47,7 @@ public class CommentApiTest {
     }
     CommentResponse create(CommentCreateRequest request){
         return restClient.post()
-                .uri("/v1/comments/")
+                .uri("/api/v1/comments/")
                 .body(request)
                 .retrieve()
                 .body(CommentResponse.class);
@@ -56,7 +56,7 @@ public class CommentApiTest {
 
     CommentResponse read(Long commentId){
         return restClient.get()
-                .uri("/v1/comments/{commentsId}",commentId)
+                .uri("/api/v1/comments/{commentsId}",commentId)
                 .retrieve()
                 .body(CommentResponse.class);
 
