@@ -11,7 +11,7 @@ public class UserApiTest {
     private static final String TEST_USERNAME = "testuser";
     private static final String TEST_PASSWORD = "password123";
 
-    private final RestClient restClient = RestClient.create("http://localhost:8080");
+    private final RestClient restClient = RestClient.create();
 
     @Test
     void signUpTest(){
