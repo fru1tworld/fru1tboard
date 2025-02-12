@@ -1,5 +1,6 @@
 package fru1t.fru1tboard.user;
 
+import fru1t.fru1tboard.auth.util.PasswordEncoder;
 import fru1t.fru1tboard.common.Snowflake;
 import fru1t.fru1tboard.user.entity.User;
 import fru1t.fru1tboard.user.request.SignUpForm;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final Snowflake snowflake = new Snowflake();
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
     @Transactional
@@ -21,7 +23,7 @@ public class UserService {
                 snowflake.nextId(),
                 request.getEmail(),
                 request.getUsername(),
-                request.getPassword()
+                passwordEncoder.encode(request.getPassword())
         ));
         return UserResponse.from(user);
     }
@@ -37,7 +39,7 @@ public class UserService {
         return UserResponse.from(user);
     }
     @Transactional
-    public void update(Long userId) {
+    public void delete(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         userRepository.delete(user);
     }

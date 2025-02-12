@@ -7,20 +7,15 @@ public class TokenResponse {
     private String accessToken;
     private String refreshToken;
 
-    private TokenResponse(String accessToken, String refreshToken) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-    }
-
-    private TokenResponse(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
     public static TokenResponse withBothTokens(String accessToken, String refreshToken) {
-        return new TokenResponse(accessToken, refreshToken);
+        TokenResponse response = new TokenResponse();
+        response.accessToken = accessToken;
+        response.refreshToken = refreshToken;
+        return response;
     }
-
     public static TokenResponse withAccessTokenOnly(String accessToken) {
-        return new TokenResponse(accessToken);
+        TokenResponse response = new TokenResponse();
+        response.accessToken = accessToken;
+        return response;
     }
 }
