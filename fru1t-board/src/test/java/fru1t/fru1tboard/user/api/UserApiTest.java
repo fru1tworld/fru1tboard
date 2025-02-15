@@ -10,6 +10,7 @@ public class UserApiTest {
     private static final String TEST_EMAIL = "test@example.com";
     private static final String TEST_USERNAME = "testuser";
     private static final String TEST_PASSWORD = "password123";
+    private static final String BASE_URL = "http://localhost:8080/api/v1";
 
     private final RestClient restClient = RestClient.create();
 
@@ -22,7 +23,7 @@ public class UserApiTest {
 
     UserResponse signUpForTest(SignUpForm signUpForm) {
         return restClient.post()
-                .uri("/api/v1/signup")
+                .uri(BASE_URL + "/signup")
                 .body(signUpForm)
                 .retrieve()
                 .body(UserResponse.class);
@@ -30,7 +31,7 @@ public class UserApiTest {
 
     void deleteUserForTest() {
         restClient.delete()
-                .uri("/api/v1/users" + TEST_USERNAME)
+                .uri(BASE_URL + "/users" + TEST_USERNAME)
                 .retrieve()
                 .toBodilessEntity();
 

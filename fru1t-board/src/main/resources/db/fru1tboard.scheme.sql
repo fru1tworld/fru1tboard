@@ -10,6 +10,8 @@ CREATE TABLE article (
     modified_at DATETIME NOT NULL
 );
 
+create index idx_board_id_article_id on article(board_id asc, article_id desc);
+
 CREATE TABLE comment (
     comment_id BIGINT PRIMARY KEY NOT NULL,
     article_id BIGINT NOT NULL,
@@ -20,6 +22,9 @@ CREATE TABLE comment (
     created_at DATETIME NOT NULL,
     modified_at DATETIME NOT NULL
 );
+
+create index idx_article_id_comment_id on comment(article_id asc, comment_id desc);
+
 
 
 CREATE TABLE user (

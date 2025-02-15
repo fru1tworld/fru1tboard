@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @SpringBootTest
 class ArticleRepositoryTest {
     @Autowired
@@ -32,5 +37,14 @@ class ArticleRepositoryTest {
         private String content;
         private Long boardId;
         private Long writeId;
+    }
+
+    @Test
+    void readAllTest() {
+    }
+
+    @Getter
+    @AllArgsConstructor
+    static class PagenationRequest{
     }
 }

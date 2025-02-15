@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;

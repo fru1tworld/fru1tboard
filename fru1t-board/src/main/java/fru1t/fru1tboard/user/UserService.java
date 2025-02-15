@@ -43,4 +43,5 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow();
         userRepository.delete(user);
     }
+
 }

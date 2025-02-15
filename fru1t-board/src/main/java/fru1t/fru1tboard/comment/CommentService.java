@@ -1,15 +1,17 @@
 package fru1t.fru1tboard.comment;
 
 
-import fru1t.fru1tboard.board.ArticleRepository;
 import fru1t.fru1tboard.comment.entity.Comment;
 import fru1t.fru1tboard.comment.request.CommentCreateRequest;
 import fru1t.fru1tboard.comment.request.CommentUpdateRequest;
+import fru1t.fru1tboard.comment.response.CommentPageResponse;
 import fru1t.fru1tboard.comment.response.CommentResponse;
 import fru1t.fru1tboard.common.Snowflake;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -53,4 +55,15 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId).orElseThrow();
         commentRepository.delete(comment);
     }
+
+    CommentPageResponse readAll(Long articleId, Long pageSize, Long lastCommentId){
+         List<Comment> comments = lastCommentId == null ?
+                commentRepository.findAll(articleId, pageSize) :
+                commentRepository.findAll(articleId, pageSize, lastCommentId);
+
+         return CommentPageResponse.create(comments);
+
+    }
+
+
 }

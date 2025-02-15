@@ -2,6 +2,7 @@ package fru1t.fru1tboard.board.api;
 
 import fru1t.fru1tboard.auth.dto.AccessToken;
 import fru1t.fru1tboard.auth.dto.LoginRequest;
+import fru1t.fru1tboard.board.response.ArticlePageResponse;
 import fru1t.fru1tboard.board.response.ArticleResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,12 +14,16 @@ import org.springframework.web.client.RestClient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Map;
+
 
 public class ArticleApiTest {
     private static final String BASE_URL = "http://localhost:8080/api/v1";
     private static final String TEST_USERNAME = "testuser";
     private static final String TEST_PASSWORD = "password123";
-    private final RestClient restClient = RestClient.create("http://localhost:8080");
+    private final RestClient restClient = RestClient.builder()
+            .baseUrl(BASE_URL)
+            .build();
     private String accessToken;
     @BeforeEach
     void setUp() {
@@ -64,13 +69,26 @@ public class ArticleApiTest {
     @Test
     void deleteTest() {
             restClient.delete()
-                    .uri(BASE_URL+ "/articles/{articleId}", 120115454734336L)
+                    .uri("/articles/{articleId}", 120115454734336L)
                     .retrieve()
                     .toBodilessEntity();
     }
+
+    @Test
+    void readAllTest(){
+//        ArticlePageResponse response = readAllFirstPage(300L);
+//        ArticlePageResponse response = readAllOtherPage(300L, 2316383232737375L);
+//        ArticlePageResponse response = readAllFirstPageByBoardId(2L, 300L);
+        ArticlePageResponse response = readAllOtherPageByBoardId(2L, 300L, 2321872758784940L);
+
+        System.out.println("response = " + response.getArticleResponses().size());
+        for (ArticleResponse articleResponse : response.getArticleResponses()) {
+            System.out.println("articleResponse = " + articleResponse.getArticleId());
+        }
+    }
     ArticleResponse update(Long articleId, ArticleUpdateRequest request){
         return restClient.put()
-                .uri(BASE_URL + "/articles/{articleId}",articleId)
+                .uri( "/articles/{articleId}",articleId)
                 .body(request)
                 .header("Authorization",  accessToken)
                 .retrieve()
@@ -79,7 +97,7 @@ public class ArticleApiTest {
     }
     ArticleResponse create(ArticleCreateRequest request){
         return restClient.post()
-                .uri(BASE_URL + "/articles")
+                .uri("/articles")
                 .body(request)
                 .header("Authorization",  accessToken)
                 .retrieve()
@@ -88,10 +106,49 @@ public class ArticleApiTest {
     }
     ArticleResponse read(Long articleId){
         return restClient.get()
-                .uri(BASE_URL + "/articles/{articleId}",articleId)
+                .uri("/articles/{articleId}",articleId)
                 .retrieve()
                 .body(ArticleResponse.class);
 
+    }
+
+    ArticlePageResponse readAllFirstPage(Long pageSize){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/board/all/articles")
+                        .queryParam("pageSize", pageSize)
+                        .build())
+                .retrieve()
+                .body(ArticlePageResponse.class);
+    }
+    ArticlePageResponse readAllOtherPage(Long pageSize, Long lastArticleId){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/board/all/articles")
+                        .queryParam("pageSize", pageSize)
+                        .queryParam("lastArticleId", lastArticleId)
+                        .build())
+                .retrieve()
+                .body(ArticlePageResponse.class);
+    }
+    ArticlePageResponse readAllFirstPageByBoardId(Long boardId, Long pageSize){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/board/{boardId}/articles")
+                        .queryParam("pageSize", pageSize)
+                        .build(boardId))
+                .retrieve()
+                .body(ArticlePageResponse.class);
+    }
+    ArticlePageResponse readAllOtherPageByBoardId(Long boardId, Long pageSize, Long lastArticleId){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/board/{boardId}/articles")
+                        .queryParam("pageSize", pageSize)
+                        .queryParam("lastArticleId", lastArticleId)
+                        .build(boardId))
+                .retrieve()
+                .body(ArticlePageResponse.class);
     }
 
     @Getter

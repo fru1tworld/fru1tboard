@@ -3,6 +3,7 @@ package fru1t.fru1tboard.comment.api;
 
 import fru1t.fru1tboard.auth.dto.AccessToken;
 import fru1t.fru1tboard.auth.dto.LoginRequest;
+import fru1t.fru1tboard.comment.response.CommentPageResponse;
 import fru1t.fru1tboard.comment.response.CommentResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +19,9 @@ public class CommentApiTest {
     private static final String BASE_URL = "http://localhost:8080/api/v1";
     private static final String TEST_USERNAME = "testuser";
     private static final String TEST_PASSWORD = "password123";
-    private final RestClient restClient = RestClient.create("http://localhost:8080");
+    private final RestClient restClient = RestClient.builder()
+            .baseUrl(BASE_URL)
+            .build();
     private String accessToken;
 
     @BeforeEach
@@ -66,9 +69,20 @@ public class CommentApiTest {
                 .retrieve()
                 .toBodilessEntity();
     }
+
+    @Test
+    void readAllTest(){
+//        CommentPageResponse commentPageResponse = readAllFirstPage(2L, 300L);
+        CommentPageResponse commentPageResponse = readAllOtherPage(2L, 300L, 2321810714060453L);
+        System.out.println("commentPageResponse = " + commentPageResponse.getCommentResponse().size());
+        for(CommentResponse commentResponse : commentPageResponse.getCommentResponse()){
+            System.out.println("commentResponse = " + commentResponse.getCommentId());
+        }
+    }
+
     CommentResponse update(Long commentId, CommentUpdateRequest request){
         return restClient.put()
-                .uri(BASE_URL + "/comments/{commentId}",commentId)
+                .uri( "/comments/{commentId}",commentId)
                 .header("Authorization",  accessToken)
                 .body(request)
                 .retrieve()
@@ -77,7 +91,7 @@ public class CommentApiTest {
     }
     CommentResponse create(CommentCreateRequest request){
         return restClient.post()
-                .uri(BASE_URL + "/api/v1/comments/")
+                .uri( "/comments/")
                 .header("Authorization",  accessToken)
                 .body(request)
                 .retrieve()
@@ -87,10 +101,30 @@ public class CommentApiTest {
 
     CommentResponse read(Long commentId){
         return restClient.get()
-                .uri("/api/v1/comments/{commentsId}",commentId)
+                .uri( "/comments/{commentsId}",commentId)
                 .retrieve()
                 .body(CommentResponse.class);
 
+    }
+
+    CommentPageResponse readAllFirstPage(Long articleId, Long pageSize){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/articles/{articleId}/comments")
+                        .queryParam("pageSize", pageSize)
+                        .build(articleId))
+                .retrieve()
+                .body(CommentPageResponse.class);
+    }
+    CommentPageResponse readAllOtherPage(Long articleId, Long pageSize, Long lastCommentId){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/articles/{articleId}/comments")
+                        .queryParam("pageSize", pageSize)
+                        .queryParam("lastCommentId", lastCommentId)
+                        .build(articleId))
+                .retrieve()
+                .body(CommentPageResponse.class);
     }
 
     @Getter
@@ -106,5 +140,12 @@ public class CommentApiTest {
     @AllArgsConstructor
     static class CommentUpdateRequest{
         private String content;
+    }
+    @Getter
+    @AllArgsConstructor
+    static class CommentPageRequest{
+        private Long pageSize;
+        private Long lastArticleId;
+
     }
 }
