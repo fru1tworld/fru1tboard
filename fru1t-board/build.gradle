@@ -39,6 +39,18 @@ dependencies {
     /* Redis */
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    /* JSON 처리 */
+    implementation("jakarta.json:jakarta.json-api:2.1.2")
+    implementation("org.glassfish:jakarta.json:2.0.1")
+
+    /* ElasticSearch */
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    /* queryDSL */
+    implementation 'com.querydsl:querydsl-core'
+    implementation 'com.querydsl:querydsl-jpa'
+    annotationProcessor 'com.querydsl:querydsl-apt'
+
     /* Swagger (Springdoc OpenAPI) */
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 
@@ -57,6 +69,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.mockito:mockito-core:5.7.0'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
 }
 
 tasks.named('test') {

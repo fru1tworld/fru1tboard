@@ -4,7 +4,6 @@ import fru1t.fru1tboard.board.request.ArticleCreateRequest;
 import fru1t.fru1tboard.board.request.ArticleUpdateRequest;
 import fru1t.fru1tboard.board.response.ArticlePageResponse;
 import fru1t.fru1tboard.board.response.ArticleResponse;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/")
 public class ArticleController {
     private final ArticleService articleService;
+    private final ArticleSearchService articleSearchService;
 
     @PostMapping("/v1/articles")
     public ArticleResponse create(@RequestBody ArticleCreateRequest request){
@@ -50,4 +50,12 @@ public class ArticleController {
                                        ) {
         return articleService.readAllByBoardId(boardId, pageSize, lastArticleId);
     }
+
+    @GetMapping("v1/search")
+    public ArticlePageResponse readAllSearch(@RequestParam("title") String title,
+                                             @RequestParam("page") Integer page,
+                                             @RequestParam("size") Integer size){
+        return articleSearchService.search(title, page, size);
+    }
+
 }

@@ -46,7 +46,6 @@ public class ArticleService {
     public ArticleResponse update(Long articleId, ArticleUpdateRequest articleUpdateRequest){
         Article article = articleRepository.findById(articleId).orElseThrow();
         article.update(articleUpdateRequest.getTitle(), articleUpdateRequest.getContent());
-
         return ArticleResponse.from(article);
     }
 
@@ -65,6 +64,4 @@ public class ArticleService {
 
         return ArticlePageResponse.create(articles);
     }
-
-
 }

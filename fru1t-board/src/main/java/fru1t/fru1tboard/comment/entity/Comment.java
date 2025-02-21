@@ -52,4 +52,8 @@ public class Comment {
     public Boolean isRoot(){
         return this.commentId == this.parentCommentId;
     }
+
+    public void delete(){
+        this.deleted = true;
+    }
 }

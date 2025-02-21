@@ -14,8 +14,6 @@ import org.springframework.web.client.RestClient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Map;
-
 
 public class ArticleApiTest {
     private static final String BASE_URL = "http://localhost:8080/api/v1";
@@ -25,27 +23,27 @@ public class ArticleApiTest {
             .baseUrl(BASE_URL)
             .build();
     private String accessToken;
-    @BeforeEach
-    void setUp() {
-        LoginRequest loginRequest = new LoginRequest(TEST_USERNAME, TEST_PASSWORD);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(MediaType.parseMediaTypes("application/json"));
-        HttpEntity<LoginRequest> request = new HttpEntity<>(loginRequest, headers);
-
-        ResponseEntity<AccessToken> response = restClient.post()
-                .uri(BASE_URL + "/login")
-                .body(request.getBody())
-                .retrieve()
-                .toEntity(AccessToken.class);
-
-        accessToken = response.getBody().getAccessToken();
-    }
+//    @BeforeEach
+//    void setUp() {
+//        LoginRequest loginRequest = new LoginRequest(TEST_USERNAME, TEST_PASSWORD);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.setAccept(MediaType.parseMediaTypes("application/json"));
+//        HttpEntity<LoginRequest> request = new HttpEntity<>(loginRequest, headers);
+//
+//        ResponseEntity<AccessToken> response = restClient.post()
+//                .uri(BASE_URL + "/login")
+//                .body(request.getBody())
+//                .retrieve()
+//                .toEntity(AccessToken.class);
+//
+//        accessToken = response.getBody().getAccessToken();
+//    }
 
     @Test
     void createTest(){
-        ArticleCreateRequest request = new ArticleCreateRequest("my title", "my content", 1L, 1L);
+        ArticleCreateRequest request = new ArticleCreateRequest("한글 검색", "my content", 1L, 1L);
 
         ArticleResponse response = create(request);
         System.out.println("response.getId = " + response.getArticleId());
@@ -75,6 +73,14 @@ public class ArticleApiTest {
     }
 
     @Test
+    void searchTest(){
+        ArticlePageResponse response = search("ㄹㅇㅌ", 0, 500);
+        System.out.println("response = " + response.getArticleResponses().size());
+        for(ArticleResponse articleResponse : response.getArticleResponses()){
+            System.out.println("articleResponse = " + articleResponse.getTitle());
+        }
+    }
+    @Test
     void readAllTest(){
 //        ArticlePageResponse response = readAllFirstPage(300L);
 //        ArticlePageResponse response = readAllOtherPage(300L, 2316383232737375L);
@@ -102,14 +108,12 @@ public class ArticleApiTest {
                 .header("Authorization",  accessToken)
                 .retrieve()
                 .body(ArticleResponse.class);
-
     }
     ArticleResponse read(Long articleId){
         return restClient.get()
                 .uri("/articles/{articleId}",articleId)
                 .retrieve()
                 .body(ArticleResponse.class);
-
     }
 
     ArticlePageResponse readAllFirstPage(Long pageSize){
@@ -151,6 +155,25 @@ public class ArticleApiTest {
                 .body(ArticlePageResponse.class);
     }
 
+    ArticlePageResponse search(String title, Integer page, Integer size){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/search")
+                        .queryParam("title", title)
+                        .queryParam("page", page)
+                        .queryParam("size", size)
+                        .build())
+                .retrieve()
+                .body(ArticlePageResponse.class);
+    }
+
+    @Getter
+    @AllArgsConstructor
+    static class ArticleSearchRequest{
+        private String title;
+        private Integer page;
+        private Integer size;
+    }
     @Getter
     @AllArgsConstructor
     static class ArticleCreateRequest{
