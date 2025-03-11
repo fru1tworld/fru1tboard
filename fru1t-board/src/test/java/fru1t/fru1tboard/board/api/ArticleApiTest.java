@@ -74,7 +74,7 @@ public class ArticleApiTest {
 
     @Test
     void searchTest(){
-        ArticlePageResponse response = search("ㄹㅇㅌ", 0, 500);
+        ArticlePageResponse response = search("새벽", 0, 500);
         System.out.println("response = " + response.getArticleResponses().size());
         for(ArticleResponse articleResponse : response.getArticleResponses()){
             System.out.println("articleResponse = " + articleResponse.getTitle());

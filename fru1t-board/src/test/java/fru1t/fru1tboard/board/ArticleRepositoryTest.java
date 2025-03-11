@@ -13,7 +13,7 @@ import java.util.List;
 @SpringBootTest
 class ArticleRepositoryTest {
     @Autowired
-    ArticleRepository articleCommandRepository;
+    ArticleRepository articleRepository;
 
     @Autowired
     ArticleSearchRepository articleQueryRepository;
@@ -27,13 +27,25 @@ class ArticleRepositoryTest {
                 request.getBoardId(),
                 request.getWriteId()
         );
-        Article response = articleCommandRepository.save(article);
-        List<ArticleSearchEntity> responses = articleQueryRepository.searchByTitle("my title", 0, 10);
+        Article response = articleRepository.save(article);
+        List<ArticleSearchEntity> responses = articleQueryRepository.searchByTitle("게이트웨이", 0, 500);
         System.out.println("responses = " + responses.size());
         for (ArticleSearchEntity articleSearchEntity : responses) {
             System.out.println("articleSearchEntity = " + articleSearchEntity.getTitle());
         }
         System.out.println("response = " + response.getArticleId());
+    }
+    @Test
+    void searchTestByMySQL(){
+        String keyword = "";
+        Long limit = 500L;
+        Long offset = 0L;
+        List<Article> responses = articleRepository.searchArticles("게이트웨이", limit, offset);
+        System.out.println("responses = " + responses.size());
+        for (Article article : responses) {
+            System.out.println("article = " + article.getTitle());
+        }
+
     }
     @Test
     void saveTest(){
@@ -44,7 +56,7 @@ class ArticleRepositoryTest {
                 request.getBoardId(),
                 request.getWriteId()
         );
-        Article response = articleCommandRepository.save(article);
+        Article response = articleRepository.save(article);
         System.out.println("response = " + response.getArticleId());
     }
 

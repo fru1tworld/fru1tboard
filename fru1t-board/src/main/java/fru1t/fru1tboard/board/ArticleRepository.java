@@ -20,7 +20,8 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
     )
     List<Article> findAll(
             @Param("limit") Long limit
-            );
+    );
+
     @Query(
             value = """
                     SELECT * 
@@ -49,7 +50,6 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
                     JOIN board_articles b ON a.article_id = b.article_id""",
             nativeQuery = true
     )
-
     List<Article> findAllByBoardId(
             @Param("boardId") Long boardId,
             @Param("limit") Long limit
@@ -73,5 +73,20 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
             @Param("boardId") Long boardId,
             @Param("limit") Long limit,
             @Param("lastArticleId") Long lastArticleId
+    );
+
+    @Query(
+            value = """
+                        SELECT *
+                        FROM article
+                        WHERE MATCH(title) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+                        ORDER BY article_id DESC
+                        LIMIT :limit OFFSET :offset""",
+            nativeQuery = true
+    )
+    List<Article> searchArticles(
+            @Param("keyword") String keyword,
+            @Param("limit") Long limit,
+            @Param("offset") Long offset
     );
 }

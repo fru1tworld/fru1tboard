@@ -12,14 +12,15 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query(value =
-            "SELECT c.comment_id, c.article_id, c.content, c.parent_comment_id, c.writer_id, c.deleted, c.created_at, c.modified_at " +
-                    "FROM comment c " +
-                    "JOIN ( " +
-                    "   SELECT comment_id AS t_comment_id " +
-                    "   FROM comment " +
-                    "   ORDER BY comment_id DESC " +
-                    "   LIMIT :limit) t " +
-                    "ON c.comment_id = t.t_comment_id",
+            """
+            SELECT c.comment_id, c.article_id, c.content, c.parent_comment_id, c.writer_id, c.deleted, c.created_at, c.modified_at 
+                    FROM comment c 
+                    JOIN ( 
+                       SELECT comment_id AS t_comment_id 
+                       FROM comment 
+                       ORDER BY comment_id DESC 
+                       LIMIT :limit) t 
+                    ON c.comment_id = t.t_comment_i""",
             nativeQuery = true)
     List<Comment> findAll(
             @Param("articleId") Long articleId,
@@ -27,15 +28,16 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     );
 
     @Query(value =
-            "SELECT c.comment_id, c.article_id, c.content, c.parent_comment_id, c.writer_id, c.deleted, c.created_at, c.modified_at " +
-                    "FROM comment c " +
-                    "JOIN ( " +
-                    "   SELECT comment_id AS t_comment_id " +
-                    "   FROM comment " +
-                    "   WHERE article_id = :articleId AND comment_id < :lastCommentId " +
-                    "   ORDER BY comment_id DESC " +
-                    "   LIMIT :limit) t " +
-                    "ON c.comment_id = t.t_comment_id",
+            """
+            SELECT c.comment_id, c.article_id, c.content, c.parent_comment_id, c.writer_id, c.deleted, c.created_at, c.modified_at 
+                    FROM comment c 
+                    JOIN ( 
+                       SELECT comment_id AS t_comment_id 
+                       FROM comment 
+                       WHERE article_id = :articleId AND comment_id < :lastCommentId 
+                       ORDER BY comment_id DESC 
+                       LIMIT :limit) t 
+                    ON c.comment_id = t.t_comment_i""",
             nativeQuery = true)
     List<Comment> findAll(
             @Param("articleId") Long articleId,
@@ -44,11 +46,13 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     );
 
     @Query(
-            value = "select count(*) from (" +
-                    "   select comment_id from comment " +
-                    "   where article_id = :articleId and parent_comment_id = :parentCommentId " +
-                    "   limit :limit" +
-                    ") t",
+            value =
+                    """
+                    select count(*) from (
+                       select comment_id from comment 
+                       where article_id = :articleId and parent_comment_id = :parentCommentId 
+                       limit :limit
+                    )""",
             nativeQuery = true
     )
     Long countBy(

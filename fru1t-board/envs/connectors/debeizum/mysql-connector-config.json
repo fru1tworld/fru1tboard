@@ -17,7 +17,7 @@
     "transforms": "unwrap",
     "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
     "transforms.unwrap.add.fields": "op,ts_ms",
-    "column.include.list": "fru1t_board.article.article_id,fru1t_board.article.title,fru1t_board.article.created_at",
+    "column.include.list": "fru1t_board.article.article_id,fru1t_board.article.title",
     "topic.prefix": "mysql"
   }
 }
