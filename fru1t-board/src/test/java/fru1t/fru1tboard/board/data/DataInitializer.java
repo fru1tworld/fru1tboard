@@ -28,7 +28,7 @@ public class DataInitializer {
     CountDownLatch latch = new CountDownLatch(EXECUTE_COUNT);
     List<String> mockTitles;
     static final int BULK_INSERT_SIZE = 2000;
-    static final int EXECUTE_COUNT = 50;
+    static final int EXECUTE_COUNT = 5000;
 
 
     @BeforeEach()
@@ -60,9 +60,9 @@ public class DataInitializer {
             for(int i = 0; i < BULK_INSERT_SIZE; i++) {
                 Article article = Article.create(
                         snowflake.nextId(),
-                        mockTitles.get(i % mockTitles.size()),
+                        "title " + i,
                         "content" + i,
-                        (snowflake.nextId() % 10L) + 1L,
+                        1L,
                         1L
                 );
                 entityManager.persist(article);

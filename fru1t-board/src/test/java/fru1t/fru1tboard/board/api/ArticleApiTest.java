@@ -14,6 +14,10 @@ import org.springframework.web.client.RestClient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 public class ArticleApiTest {
     private static final String BASE_URL = "http://localhost:8080/api/v1";
@@ -81,17 +85,89 @@ public class ArticleApiTest {
         }
     }
     @Test
-    void readAllTest(){
-//        ArticlePageResponse response = readAllFirstPage(300L);
-//        ArticlePageResponse response = readAllOtherPage(300L, 2316383232737375L);
-//        ArticlePageResponse response = readAllFirstPageByBoardId(2L, 300L);
-        ArticlePageResponse response = readAllOtherPageByBoardId(2L, 300L, 2321872758784940L);
+    void readAllTestWithCorvering(){
+        List<Long> responseTimes = new ArrayList<>();
 
-        System.out.println("response = " + response.getArticleResponses().size());
-        for (ArticleResponse articleResponse : response.getArticleResponses()) {
-            System.out.println("articleResponse = " + articleResponse.getArticleId());
+        long start = System.currentTimeMillis();
+        ArticlePageResponse response = readAllByBoardIdWithCorvering(1L,301L,0L);
+        long duration = System.currentTimeMillis() - start;
+        responseTimes.add(duration);
+
+        List<ArticleResponse> firstPageArticles = response.getArticleResponses();
+        if (firstPageArticles.isEmpty()) {
+            System.out.println("조회된 Article이 없습니다.");
+            return;
         }
+
+        for (int i = 0; i<999; i++) {
+            start = System.currentTimeMillis();
+            response = readAllByBoardIdWithCorvering(1L,301L, (300* (long)i + 1));
+            duration = System.currentTimeMillis() - start;
+            responseTimes.add(duration);
+
+            System.out.println("duration = "+ i + " 번째" + duration);
+            List<ArticleResponse> articles = response.getArticleResponses();
+            if (articles.isEmpty()) {
+                break;
+            }
+        }
+
+        Collections.sort(responseTimes);
+        long p999 = responseTimes.get(responseTimes.size() - 1);
+        double average = responseTimes.stream()
+                .mapToLong(Long::longValue)
+                .average()
+                .orElse(0);
+
+        // 결과 출력
+        System.out.println("전체 실행 횟수: " + responseTimes.size());
+        System.out.println("평균 응답 시간: " + average + " ms");
+        System.out.println("p999 응답 시간: " + p999 + " ms");
     }
+    @Test
+    void readAllTest(){
+        List<Long> responseTimes = new ArrayList<>();
+
+        long start = System.currentTimeMillis();
+        ArticlePageResponse response = readAllFirstPageByBoardId(1L, 301L);
+        long duration = System.currentTimeMillis() - start;
+        responseTimes.add(duration);
+
+        List<ArticleResponse> firstPageArticles = response.getArticleResponses();
+        if (firstPageArticles.isEmpty()) {
+            System.out.println("조회된 Article이 없습니다.");
+            return;
+        }
+        long lastArticleId = firstPageArticles.get(firstPageArticles.size() - 1).getArticleId();
+
+        for (int i = 0; i <999; i++) {
+            start = System.currentTimeMillis();
+            response = readAllOtherPageByBoardId(1L, 301L, lastArticleId);
+            duration = System.currentTimeMillis() - start;
+            responseTimes.add(duration);
+
+            List<ArticleResponse> articles = response.getArticleResponses();
+            if (articles.isEmpty()) {
+                break;
+            }
+            lastArticleId = articles.get(articles.size() - 1).getArticleId();
+        }
+        Collections.sort(responseTimes);
+
+
+        long p999 = responseTimes.get(responseTimes.size() - 1);
+
+        double average = responseTimes.stream()
+                .mapToLong(Long::longValue)
+                .average()
+                .orElse(0);
+
+        // 결과 출력
+        System.out.println("전체 실행 횟수: " + responseTimes.size());
+        System.out.println("평균 응답 시간: " + average + " ms");
+        System.out.println("p999 응답 시간: " + p999 + " ms");
+    }
+
     ArticleResponse update(Long articleId, ArticleUpdateRequest request){
         return restClient.put()
                 .uri( "/articles/{articleId}",articleId)
@@ -150,6 +226,17 @@ public class ArticleApiTest {
                         .path( "/board/{boardId}/articles")
                         .queryParam("pageSize", pageSize)
                         .queryParam("lastArticleId", lastArticleId)
+                        .build(boardId))
+                .retrieve()
+                .body(ArticlePageResponse.class);
+    }
+
+    ArticlePageResponse readAllByBoardIdWithCorvering(Long boardId, Long limit, Long offset){
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path( "/board/{boardId}/articles/cv")
+                        .queryParam("limit", limit)
+                        .queryParam("offset", offset)
                         .build(boardId))
                 .retrieve()
                 .body(ArticlePageResponse.class);

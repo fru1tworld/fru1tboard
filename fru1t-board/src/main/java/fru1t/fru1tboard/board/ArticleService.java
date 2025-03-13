@@ -64,4 +64,9 @@ public class ArticleService {
 
         return ArticlePageResponse.create(articles);
     }
+
+    public ArticlePageResponse readAllByBoardIdCorvering(Long boardId, Long limit, Long offset){
+        List<Article> articles = articleRepository.findAllByBoardIdWithCorvering(boardId, limit, offset);
+        return ArticlePageResponse.create(articles);
+    }
 }

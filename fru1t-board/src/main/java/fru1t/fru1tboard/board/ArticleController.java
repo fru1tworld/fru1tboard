@@ -51,6 +51,14 @@ public class ArticleController {
         return articleService.readAllByBoardId(boardId, pageSize, lastArticleId);
     }
 
+    @GetMapping("v1/board/{boardId}/articles/cv")
+    public ArticlePageResponse readAllByboardIdCorvering(@PathVariable Long boardId,
+                                                @RequestParam("limit") Long limit,
+                                                @RequestParam("offset") Long offset
+    ) {
+        return articleService.readAllByBoardIdCorvering(boardId, limit, offset);
+    }
+
     @GetMapping("v1/search")
     public ArticlePageResponse readAllSearch(@RequestParam("title") String title,
                                              @RequestParam("page") Integer page,

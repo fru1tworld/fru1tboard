@@ -12,10 +12,10 @@ import java.util.List;
 public interface ArticleRepository extends JpaRepository<Article,Long> {
     @Query(
             value = """
-                    SELECT * 
-                    FROM article 
-                    ORDER BY article_id 
-                    LIMIT :limit""",
+                SELECT * 
+                FROM article 
+                ORDER BY article_id DESC
+                LIMIT :limit""",
             nativeQuery = true
     )
     List<Article> findAll(
@@ -24,11 +24,11 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
 
     @Query(
             value = """
-                    SELECT * 
-                    FROM article 
-                    WHERE article_id < :lastArticleId 
-                    ORDER BY article_id 
-                    LIMIT :limit""",
+                SELECT * 
+                FROM article 
+                WHERE article_id < :lastArticleId 
+                ORDER BY article_id DESC
+                LIMIT :limit""",
             nativeQuery = true
     )
     List<Article> findAll(
@@ -38,16 +38,11 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
 
     @Query(
             value = """
-                    WITH board_articles AS ( 
-                        SELECT article_id 
-                        FROM article 
-                        WHERE board_id = :boardId
-                        ORDER BY article_id DESC 
-                        LIMIT :limit 
-                    ) 
-                    SELECT a.* 
-                    FROM article a 
-                    JOIN board_articles b ON a.article_id = b.article_id""",
+                SELECT * 
+                FROM article  
+                WHERE board_id = :boardId
+                ORDER BY article_id DESC
+                LIMIT :limit""",
             nativeQuery = true
     )
     List<Article> findAllByBoardId(
@@ -56,17 +51,33 @@ public interface ArticleRepository extends JpaRepository<Article,Long> {
     );
 
     @Query(
+            value = """
+            WITH board_articles AS (
+                SELECT article_id
+                FROM article
+                WHERE board_id = :boardId
+                ORDER BY article_id DESC
+                LIMIT :limit OFFSET :offset
+                )
+            SELECT a.*
+            FROM article a
+            JOIN board_articles b ON a.article_id = b.article_id
+            ORDER BY a.article_id DESC;""",
+            nativeQuery = true
+    )
+    List<Article> findAllByBoardIdWithCorvering(
+            @Param("boardId") Long boardId,
+            @Param("limit") Long limit,
+            @Param("offset") Long offset
+    );
+
+    @Query(
             value = """ 
-                        WITH board_articles AS ( 
-                        SELECT article_id 
-                        FROM article 
-                        WHERE board_id = :boardId and article_id < :lastArticleId 
-                        ORDER BY article_id DESC 
-                        LIMIT :limit 
-                    ) 
-                    SELECT a.* 
-                    FROM article a  
-                    JOIN board_artiCles b ON a.article_id = b.article_id""",
+                SELECT * 
+                FROM article
+                WHERE board_id = :boardId AND article_id < :lastArticleId 
+                ORDER BY article_id DESC
+                LIMIT :limit""",
             nativeQuery = true
     )
     List<Article> findAllByBoardId(
