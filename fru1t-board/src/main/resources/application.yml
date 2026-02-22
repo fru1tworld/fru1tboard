@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: ${SPRING_APP_NAME:fru1t-board}
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/${DB_NAME:fru1t_board}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+    elasticsearch:
+      repositories:
+        enabled: true
+      uris: ${ES_URIS:http://localhost:9200}
+
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: native
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE}
+  allowed-headers: ${CORS_ALLOWED_HEADERS:*}
+  allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
+
+cookie:
+  secure: ${COOKIE_SECURE:false}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    org.springframework: ${LOG_LEVEL_SPRING:DEBUG}
+    com.fru1tboard: ${LOG_LEVEL_APP:DEBUG}
+  file:
+    name: ${LOG_FILE_NAME:logs/fru1t-board.log}
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_UI_ENABLED:true}
+    path: ${SWAGGER_UI_PATH:/swagger-ui.html}
+  api-docs:
+    enabled: ${API_DOCS_ENABLED:true}
+    path: ${API_DOCS_PATH:/v3/api-docs}
+  packages-to-scan: ${API_PACKAGES_TO_SCAN:com.fru1tboard.controller}

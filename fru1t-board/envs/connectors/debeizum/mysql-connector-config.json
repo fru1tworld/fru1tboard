@@ -1,0 +1,23 @@
+{
+  "name": "mysql-source-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "database.hostname": "mysql-db",
+    "database.port": "3306",
+    "database.user": "root",
+    "database.password": "root",
+    "database.server.id": "184054",
+    "database.history.kafka.bootstrap.servers": "kafka-broker:29092",
+    "database.history.kafka.topic": "schema-changes.mysql.fru1t_board",
+    "schema.history.internal.kafka.bootstrap.servers": "kafka-broker:29092",
+    "schema.history.internal.kafka.topic": "schema-changes.mysql.fru1t_board.history",
+    "database.include.list": "fru1t_board",
+    "table.include.list": "fru1t_board.article",
+    "include.schema.changes": "false",
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.add.fields": "op,ts_ms",
+    "column.include.list": "fru1t_board.article.article_id,fru1t_board.article.title",
+    "topic.prefix": "mysql"
+  }
+}
